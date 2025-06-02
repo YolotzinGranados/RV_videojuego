@@ -178,7 +178,7 @@ function init() {
   dirLight.castShadow = true; // Habilitar proyección de sombras
   dirLight.shadow.mapSize.width = 1024;
   dirLight.shadow.mapSize.height = 1024;
-  scene.add(dirLight);
+ scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1.2));
 
   // Mostrar interfaz de inicio
   mostrarInterfazInicio();
@@ -1040,7 +1040,7 @@ function actualizarCamara() {
 
   const target = new THREE.Vector3(
     personaje.position.x,
-    personaje.position.y + 1.5,
+    personaje.position.y + 1.6,
     personaje.position.z
   );
 
@@ -1052,12 +1052,15 @@ function actualizarCamara() {
 function animate() {
   renderer.setAnimationLoop(() => {
     const delta = clock.getDelta();
+
     if (animManager) animManager.actualizar(delta);
     actualizarMovimiento(delta);
-    actualizarCamara();
+    actualizarCamara(); // Omitirá cambios si está en VR
+
     renderer.render(scene, camera);
   });
 }
+
 
 
 // Iniciar la aplicación
