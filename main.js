@@ -911,6 +911,29 @@ if (animManager) {
       ganarJuego();
     }
   }
+  if (renderer.xr.isPresenting) {
+  const velocidad = velocidadMovimiento * delta * 60;
+
+  // Dirección hacia donde el usuario está mirando
+  const direction = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+  direction.y = 0;
+  direction.normalize();
+  direction.multiplyScalar(velocidad);
+
+  // Verificar colisión antes de mover
+  const nuevaPosicion = personaje.position.clone().add(direction);
+  if (!detectarColision(nuevaPosicion)) {
+    personaje.position.copy(nuevaPosicion);
+  }
+
+  // También puedes mantener animaciones
+  if (animManager) {
+    animManager.reproducirAnimacion('MapacheCaminando');
+  }
+
+  return; // Salir de la función para evitar que el resto se ejecute
+}
+
   
    detectarColisionConMonedas();
 }
