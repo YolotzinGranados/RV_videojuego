@@ -845,6 +845,18 @@ function actualizarMovimiento(delta) {
     if (!detectarColision(nuevaPosicionZ)) {
       personaje.position.z = nuevaPosicionZ.z;
     }
+    if (renderer.xr.isPresenting) {
+  const velocidad = velocidadMovimiento * delta * 60;
+
+  // Avanzar si el botón del mando está presionado (ejemplo simplificado)
+  if (teclasPresionadas['w']) { // Puedes reemplazar esto por un botón del controlador luego
+    const direction = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+    direction.y = 0;
+    direction.normalize();
+    direction.multiplyScalar(velocidad);
+    personaje.position.add(direction);
+  }
+}
   }
 
   // Manejar animaciones
