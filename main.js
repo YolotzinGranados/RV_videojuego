@@ -141,26 +141,12 @@ class AnimacionManager {
     this.mixer.update(delta);
   }
 }
-
-// Configuración inicial
 function init() {
-  // Crear escena
-cameraRig = new THREE.Group();
-cameraRig.add(camera);
-scene.add(cameraRig);
-
+  // 1. Crear escena
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0xaaaaaa);
 
-  // Cargar HDRI
-  const rgbeLoader = new RGBELoader();
-  rgbeLoader.load("assets/texturas/ambiente.hdr", function (texture) {
-    texture.mapping = THREE.EquirectangularReflectionMapping;
-    scene.environment = texture;
-    scene.background = texture;
-  });
-
-  // Configurar cámara en tercera persona
+  // 2. Crear cámara
   camera = new THREE.PerspectiveCamera(
     75,
     window.innerWidth / window.innerHeight,
@@ -168,25 +154,39 @@ scene.add(cameraRig);
     1000
   );
 
+  // 3. Crear y agregar cameraRig
+  cameraRig = new THREE.Group();
+  cameraRig.add(camera);
+  scene.add(cameraRig);
 
-  // Luces
+  // 4. Cargar HDRI
+  const rgbeLoader = new RGBELoader();
+  rgbeLoader.load("assets/texturas/ambiente.hdr", function (texture) {
+    texture.mapping = THREE.EquirectangularReflectionMapping;
+    scene.environment = texture;
+    scene.background = texture;
+  });
+
+  // 5. Luces
   scene.add(new THREE.AmbientLight(0xffffff, 0.6));
   const dirLight = new THREE.DirectionalLight(0xffffff, 1);
   dirLight.position.set(5, 10, 7);
-  dirLight.castShadow = true; // Habilitar proyección de sombras
+  dirLight.castShadow = true;
   dirLight.shadow.mapSize.width = 1024;
   dirLight.shadow.mapSize.height = 1024;
- scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1.2));
+  scene.add(dirLight);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1.2));
 
-  // Mostrar interfaz de inicio
+  // 6. Interfaz de inicio
   mostrarInterfazInicio();
 
-  // Event listeners
-  setupEventListeners();
+  // 7. Event listeners
+  setupEventListeners(); // (asumo que defines esto en otro lado)
 
-  // Animación
+  // 8. Animación
   animate();
 }
+
 
 // Interfaz de inicio
 function mostrarInterfazInicio() {
