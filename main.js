@@ -161,7 +161,7 @@ function init() {
 
   // 4. Cargar HDRI
   const rgbeLoader = new RGBELoader();
-  rgbeLoader.load("assets/texturas/ambiente.hdr", function (texture) {
+  rgbeLoader.load("./assets/texturas/ambiente.hdr", function (texture) {
     texture.mapping = THREE.EquirectangularReflectionMapping;
     scene.environment = texture;
     scene.background = texture;
