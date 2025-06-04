@@ -31,10 +31,6 @@ const tamanoCelda = 5;
 const tamanoLaberinto = 15;
 let juegoGanado = false;
 let laberintoData;
-
-cameraRig.add(camera);
-scene.add(cameraRig);
-
 const contadorDiv = document.createElement("div");
 contadorDiv.style.position = "absolute";
 contadorDiv.style.right = "10px";
