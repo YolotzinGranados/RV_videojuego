@@ -872,7 +872,6 @@ function avanzarConBotonVR(delta) {
   }
 }
 
-
 function animate() {
   renderer.setAnimationLoop(() => {
     const delta = clock.getDelta();
