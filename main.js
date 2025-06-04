@@ -744,39 +744,18 @@ function detectarColision(nuevaPosicion) {
   
   return colision;
 }
-
 function actualizarMovimiento(delta) {
-   if (!personaje || !juegoIniciado || !animManager) return;
-  if (!renderer.xr.isPresenting) return; // Solo mover si está en VR
+  if (!personaje || !juegoIniciado || !animManager) return;
 
-  const velocidad = velocidadMovimiento * delta * 60;
-
-  // Dirección hacia donde el usuario está mirando
-  const direction = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
-  direction.y = 0;
-  direction.normalize();
-  direction.multiplyScalar(velocidad);
-
-  // Calcular nueva posición
-  const nuevaPosicion = personaje.position.clone().add(direction);
-
-  // Verificar colisión antes de mover
-  if (!detectarColision(nuevaPosicion)) {
-    personaje.position.copy(nuevaPosicion);
-  }
-
-  // Reproducir animación de caminar
-  animManager.reproducirAnimacion('MapacheCaminando');
-
-  // Verificar colisión con monedas
+  // Solo usamos esta función para colisiones con monedas y victoria
   detectarColisionConMonedas();
 
-  // Verificar si ganó
   const distanciaAlCentro = personaje.position.distanceTo(new THREE.Vector3(0, 0, 0));
   if (!juegoGanado && distanciaAlCentro < tamanoCelda / 2) {
     ganarJuego();
   }
 }
+
 
   function detectarColisionConMonedas() {
   for (let i = monedas.length - 1; i >= 0; i--) {
