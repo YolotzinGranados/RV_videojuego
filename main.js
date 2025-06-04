@@ -869,25 +869,9 @@ function actualizarCamara() {
 }
 
 
-function avanzarConVR(valor, delta) {
+function avanzarConBotonVR(delta) {
   if (!personaje || !juegoIniciado || !animManager) return;
 
-  const velocidad = velocidadMovimiento * delta * 60 * valor;
-
-  const direction = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
-  direction.y = 0;
-  direction.normalize();
-  direction.multiplyScalar(velocidad);
-
-  const nuevaPosicion = personaje.position.clone().add(direction);
-  if (!detectarColision(nuevaPosicion)) {
-    personaje.position.copy(nuevaPosicion);
-  }
-
-  animManager.reproducirAnimacion('MapacheCaminando');
-  detectarColisionConMonedas();
-}
-function avanzarConBotonVR(delta) {
   const velocidad = velocidadMovimiento * delta * 60;
 
   const direction = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
@@ -912,14 +896,12 @@ function animate() {
     actualizarMovimiento(delta);
     actualizarCamara();
 
-    // ✅ Detectar gatillo del control derecho (botón 1)
+    // Detectar gatillo del control derecho (botón 1)
     const session = renderer.xr.getSession();
     if (session) {
       for (const source of session.inputSources) {
         if (source && source.handedness === 'right' && source.gamepad) {
           const buttons = source.gamepad.buttons;
-          
-          // Cambiar a buttons[1] si estás usando el gatillo
           if (buttons.length > 1 && buttons[1].pressed) {
             avanzarConBotonVR(delta);
           }
