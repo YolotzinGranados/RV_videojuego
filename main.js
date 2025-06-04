@@ -746,7 +746,8 @@ function detectarColision(nuevaPosicion) {
 }
 
 function actualizarMovimiento(delta) {
-  if (!personaje || !juegoIniciado || !animManager || !renderer.xr.isPresenting) return;
+   if (!personaje || !juegoIniciado || !animManager) return;
+  if (!renderer.xr.isPresenting) return; // Solo mover si está en VR
 
   const velocidad = velocidadMovimiento * delta * 60;
 
@@ -871,9 +872,6 @@ function actualizarCamara() {
 // Bucle de animación
 function animate() {
   renderer.setAnimationLoop(() => {
-    // ⚠️ Solo continuar si está activo el visor VR
-    if (!renderer.xr.isPresenting) return;
-
     const delta = clock.getDelta();
 
     if (animManager) animManager.actualizar(delta);
@@ -883,6 +881,7 @@ function animate() {
     renderer.render(scene, camera);
   });
 }
+
 
 
 
