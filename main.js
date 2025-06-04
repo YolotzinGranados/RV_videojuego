@@ -4,8 +4,6 @@ import { RGBELoader } from "https://esm.sh/three@0.160.1/examples/jsm/loaders/RG
 import { VRButton } from "https://esm.sh/three@0.160.1/examples/jsm/webxr/VRButton.js";
 
 
-
-
 // Variables globales
 let scene, camera, renderer, personaje, mixer, acciones = {};
 let teclasPresionadas = {};
@@ -22,14 +20,9 @@ let velocidadVertical = 0;
 const gravedad = 0.05;
 const fuerzaSalto = 0.15;
 let puedeSaltar = true;
+let cameraRig = new THREE.Group();
 
-// Crear renderer
-renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = true;
-renderer.xr.enabled = true; // Habilitar VR (después de crear renderer)
-document.body.appendChild(renderer.domElement);
-document.body.appendChild(VRButton.createButton(renderer)); // Crear botón VR
+
 
 const clock = new THREE.Clock();
 const velocidadMovimiento = 0.1;
@@ -38,6 +31,9 @@ const tamanoCelda = 5;
 const tamanoLaberinto = 15;
 let juegoGanado = false;
 let laberintoData;
+
+cameraRig.add(camera);
+scene.add(cameraRig);
 
 const contadorDiv = document.createElement("div");
 contadorDiv.style.position = "absolute";
@@ -52,6 +48,12 @@ document.body.appendChild(contadorDiv);
 let contador = 0;
 contadorDiv.textContent = `Monedas: ${contador}`;
 
+renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.xr.enabled = true;
+document.body.appendChild(renderer.domElement);
+document.body.appendChild(VRButton.createButton(renderer));
 
 
 
@@ -59,6 +61,7 @@ contadorDiv.textContent = `Monedas: ${contador}`;
 const monedas = [];
 const monedaGeometry = new THREE.CylinderGeometry(0.5, 0.5, 0.1, 32);
 const monedaMaterial = new THREE.MeshStandardMaterial({ color: 0xffd700 });
+
 
 function generarMonedas(cantidad) {
   for (let i = 0; i < cantidad; i++) {
@@ -165,11 +168,6 @@ function init() {
     1000
   );
 
-  // Renderizador
-  renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.shadowMap.enabled = true; // Habilitar sombras
-  document.getElementById("container").appendChild(renderer.domElement);
 
   // Luces
   scene.add(new THREE.AmbientLight(0xffffff, 0.6));
@@ -921,10 +919,11 @@ if (animManager) {
   direction.multiplyScalar(velocidad);
 
   // Verificar colisión antes de mover
-  const nuevaPosicion = personaje.position.clone().add(direction);
-  if (!detectarColision(nuevaPosicion)) {
-    personaje.position.copy(nuevaPosicion);
-  }
+  const nuevaPosicion = cameraRig.position.clone().add(direction);
+if (!detectarColision(nuevaPosicion)) {
+  cameraRig.position.copy(nuevaPosicion);
+}
+
 
   // También puedes mantener animaciones
   if (animManager) {
