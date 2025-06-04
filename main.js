@@ -193,7 +193,7 @@ function mostrarInterfazInicio() {
   overlay.style.left = '0';
   overlay.style.width = '100%';
   overlay.style.height = '100%';
-  overlay.style.backgroundColor = 'rgba(0,0,0,0.7)';
+  overlay.style.backgroundColor = 'rgba(9, 1, 105, 0.7)';
   overlay.style.display = 'flex';
   overlay.style.justifyContent = 'center';
   overlay.style.alignItems = 'center';
@@ -688,37 +688,6 @@ function posicionarJugadorEnEntrada() {
   }
 }
 
-// Configurar controles
-function setupEventListeners() {
-  // Teclado - Eliminados los listeners duplicados
-  document.addEventListener('keydown', (event) => {
-    const key = event.key.toLowerCase();
-    teclasPresionadas[key] = true;
-    
-    // Espacio para saltar
-    if (key === ' ' && !enElAire && juegoIniciado) {
-  enElAire = true;
-  if (animManager) animManager.reproducirAnimacion('MapacheSaltando', true);
-}
-    
-    // Shift para correr
-    if (key === 'shift') {
-      teclasPresionadas['shift'] = true;
-    }
-  });
-
-  document.addEventListener('keyup', (event) => {
-    const key = event.key.toLowerCase();
-    teclasPresionadas[key] = false;
-  });
-
-  // Redimensionamiento
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
-}
 
 // Función para mostrar debug de colisión si es necesario
 function mostrarDebugColision(caja) {
@@ -776,136 +745,9 @@ function detectarColision(nuevaPosicion) {
   return colision;
 }
 
-// Movimiento del personaje mejorado
 function actualizarMovimiento(delta) {
-  if (!personaje || !juegoIniciado || !animManager) return;
+  if (!personaje || !juegoIniciado || !animManager || !renderer.xr.isPresenting) return;
 
-
-  const velocidad = velocidadMovimiento * delta * 60;
-  const velocidadGiro = velocidadRotacion * delta * 60;
-
-  // Rotación con Q y E
-  if (teclasPresionadas['q']) {
-    personaje.rotation.y += velocidadGiro;
-  }
-  if (teclasPresionadas['e']) {
-    personaje.rotation.y -= velocidadGiro;
-  }
-
-  // Detectar movimiento para animaciones
-  let estaMoviendo = false;
-
-  // Movimiento adelante/atrás/izquierda/derecha
-  if (teclasPresionadas['w'] || teclasPresionadas['s'] || teclasPresionadas['a'] || teclasPresionadas['d']) {
-    estaMoviendo = true;
-    
-    // Crear vector de movimiento en el espacio local del personaje
-    const movimiento = new THREE.Vector3();
-    
-    if (teclasPresionadas['w']) movimiento.z += 1; // Adelante (negativo en Z local)
-    if (teclasPresionadas['s']) movimiento.z -= 1; // Atrás
-    if (teclasPresionadas['a']) movimiento.x += 1; // Izquierda
-    if (teclasPresionadas['d']) movimiento.x -= 1; // Derecha
-    
-    // Normalizar para mantener velocidad constante en movimientos diagonales
-    if (movimiento.length() > 0) {
-      movimiento.normalize();
-    }
-    
-    // Aplicar la rotación del personaje al vector de movimiento
-    movimiento.applyQuaternion(personaje.quaternion);
-    
-    // Ignorar componente Y (no queremos volar)
-    movimiento.y = 0;
-    
-    // Aplicar velocidad
-    movimiento.multiplyScalar(velocidad);
-    
-    // Implementar deslizamiento en paredes - probar movimiento en cada eje por separado
-    const posicionOriginal = personaje.position.clone();
-    
-    // Intentar movimiento en X
-    const nuevaPosicionX = posicionOriginal.clone();
-    nuevaPosicionX.x += movimiento.x;
-    
-    if (!detectarColision(nuevaPosicionX)) {
-      personaje.position.x = nuevaPosicionX.x;
-    }
-    
-    // Intentar movimiento en Z
-    const nuevaPosicionZ = personaje.position.clone();
-    nuevaPosicionZ.z += movimiento.z;
-    
-    if (!detectarColision(nuevaPosicionZ)) {
-      personaje.position.z = nuevaPosicionZ.z;
-    }
-    if (renderer.xr.isPresenting) {
-  const velocidad = velocidadMovimiento * delta * 60;
-
-  // Avanzar si el botón del mando está presionado (ejemplo simplificado)
-  if (teclasPresionadas['w']) { // Puedes reemplazar esto por un botón del controlador luego
-    const direction = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
-    direction.y = 0;
-    direction.normalize();
-    direction.multiplyScalar(velocidad);
-    personaje.position.add(direction);
-  }
-}
-  }
-
-  // Manejar animaciones
-  // Manejar animaciones con el nuevo sistema
-if (animManager) {
-  if (enElAire) {
-    // Verificar si la animación de salto terminó
-    if (personaje.position.y <= 0.05) {
-      personaje.position.y = 0;
-      enElAire = false;
-      // Volver a la animación apropiada según el estado
-      if (estaMoviendo) {
-        if (teclasPresionadas['shift']) {
-          animManager.reproducirAnimacion('MapacheCorriendo');
-        } else {
-          animManager.reproducirAnimacion('MapacheCaminando');
-        }
-      } else {
-        animManager.reproducirAnimacion('MapacheCaminando'); // Asume que tienes una animación Idle
-      }
-    } else {
-      animManager.reproducirAnimacion('MapacheSaltando');
-    }
-  } 
-  else if (estaMoviendo) {
-    if (teclasPresionadas['shift']) {
-      animManager.reproducirAnimacion('MapacheCorriendo');
-    } else {
-      animManager.reproducirAnimacion('MapacheCaminando');
-    }
-  } 
-  else {
-    animManager.reproducirAnimacion('MapacheCaminando'); // Animación de reposo
-  }
-}
-
-  // Manejar salto
-  if (enElAire) {
-    const tiempoSalto = Date.now() * 0.01;
-    personaje.position.y = Math.max(0, Math.sin(tiempoSalto) * 1.5);
-    
-    if (personaje.position.y <= 0.05) {
-      personaje.position.y = 0;
-      enElAire = false;
-    }
-  }
-
-  // Comprobar victoria
-  if (!juegoGanado && personaje) {
-    const distanciaAlCentro = personaje.position.distanceTo(new THREE.Vector3(0, 0, 0));
-    if (distanciaAlCentro < tamanoCelda / 2) {
-      ganarJuego();
-    }
-  }
-  if (renderer.xr.isPresenting) {
   const velocidad = velocidadMovimiento * delta * 60;
 
   // Dirección hacia donde el usuario está mirando
@@ -914,43 +756,26 @@ if (animManager) {
   direction.normalize();
   direction.multiplyScalar(velocidad);
 
+  // Calcular nueva posición
+  const nuevaPosicion = personaje.position.clone().add(direction);
+
   // Verificar colisión antes de mover
-  const nuevaPosicion = cameraRig.position.clone().add(direction);
-if (!detectarColision(nuevaPosicion)) {
-  cameraRig.position.copy(nuevaPosicion);
-}
-
-
-  // También puedes mantener animaciones
-  if (animManager) {
-    animManager.reproducirAnimacion('MapacheCaminando');
+  if (!detectarColision(nuevaPosicion)) {
+    personaje.position.copy(nuevaPosicion);
   }
 
-  return; // Salir de la función para evitar que el resto se ejecute
-}
+  // Reproducir animación de caminar
+  animManager.reproducirAnimacion('MapacheCaminando');
 
-  
-   detectarColisionConMonedas();
-}
+  // Verificar colisión con monedas
+  detectarColisionConMonedas();
 
-  // Manejar salto
-  if (enElAire) {
-    const tiempoSalto = Date.now() * 0.01;
-    personaje.position.y = Math.max(0, Math.sin(tiempoSalto) * 1.5);
-    
-    if (personaje.position.y <= 0.05) {
-      personaje.position.y = 0;
-      enElAire = false;
-    }
+  // Verificar si ganó
+  const distanciaAlCentro = personaje.position.distanceTo(new THREE.Vector3(0, 0, 0));
+  if (!juegoGanado && distanciaAlCentro < tamanoCelda / 2) {
+    ganarJuego();
   }
-
-  // Comprobar victoria
-  if (!juegoGanado && personaje) {
-    const distanciaAlCentro = personaje.position.distanceTo(new THREE.Vector3(0, 0, 0));
-    if (distanciaAlCentro < tamanoCelda / 2) {
-      ganarJuego();
-    }
-  }
+}
 
   function detectarColisionConMonedas() {
   for (let i = monedas.length - 1; i >= 0; i--) {
@@ -1046,11 +871,14 @@ function actualizarCamara() {
 // Bucle de animación
 function animate() {
   renderer.setAnimationLoop(() => {
+    // ⚠️ Solo continuar si está activo el visor VR
+    if (!renderer.xr.isPresenting) return;
+
     const delta = clock.getDelta();
 
     if (animManager) animManager.actualizar(delta);
     actualizarMovimiento(delta);
-    actualizarCamara(); // Omitirá cambios si está en VR
+    actualizarCamara();
 
     renderer.render(scene, camera);
   });
