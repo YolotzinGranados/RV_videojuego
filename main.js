@@ -868,6 +868,25 @@ function actualizarCamara() {
   camera.lookAt(target);
 }
 
+function avanzarConVR(valor, delta) {
+  if (!personaje || !juegoIniciado || !animManager) return;
+
+  const velocidad = velocidadMovimiento * delta * 60 * valor;
+
+  const direction = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+  direction.y = 0;
+  direction.normalize();
+  direction.multiplyScalar(velocidad);
+
+  const nuevaPosicion = personaje.position.clone().add(direction);
+  if (!detectarColision(nuevaPosicion)) {
+    personaje.position.copy(nuevaPosicion);
+  }
+
+  animManager.reproducirAnimacion('MapacheCaminando');
+  detectarColisionConMonedas();
+}
+
 
 // Bucle de animación
 function animate() {
@@ -880,6 +899,22 @@ function animate() {
 
     renderer.render(scene, camera);
   });
+  const session = renderer.xr.getSession();
+if (session) {
+  for (const source of session.inputSources) {
+    if (source.gamepad) {
+      const axes = source.gamepad.axes;
+      const buttons = source.gamepad.buttons;
+
+      // Eje hacia adelante (en la mayoría de los mandos VR es eje[3])
+      const forwardValue = axes[3]; // Cambia a [1] si es el eje vertical
+
+      if (Math.abs(forwardValue) > 0.2) {
+        avanzarConVR(forwardValue, delta);
+      }
+    }
+  }
+}
 }
 
 
