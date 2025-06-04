@@ -904,8 +904,6 @@ function avanzarConBotonVR(delta) {
   detectarColisionConMonedas();
 }
 
-
-
 function animate() {
   renderer.setAnimationLoop(() => {
     const delta = clock.getDelta();
@@ -914,13 +912,15 @@ function animate() {
     actualizarMovimiento(delta);
     actualizarCamara();
 
-    // ✅ DETECTAR BOTÓN A DEL CONTROL DERECHO (VR)
+    // ✅ Detectar gatillo del control derecho (botón 1)
     const session = renderer.xr.getSession();
     if (session) {
       for (const source of session.inputSources) {
-        if (source.gamepad && source.handedness === "right") {
+        if (source && source.handedness === 'right' && source.gamepad) {
           const buttons = source.gamepad.buttons;
-          if (buttons[0]?.pressed) {
+          
+          // Cambiar a buttons[1] si estás usando el gatillo
+          if (buttons.length > 1 && buttons[1].pressed) {
             avanzarConBotonVR(delta);
           }
         }
@@ -930,10 +930,6 @@ function animate() {
     renderer.render(scene, camera);
   });
 }
-
-
-
-
 
 // Iniciar la aplicación
 init();
