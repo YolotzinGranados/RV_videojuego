@@ -145,6 +145,10 @@ class AnimacionManager {
 // Configuración inicial
 function init() {
   // Crear escena
+cameraRig = new THREE.Group();
+cameraRig.add(camera);
+scene.add(cameraRig);
+
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0xaaaaaa);
 
@@ -846,10 +850,8 @@ function actualizarCamara() {
 
   camera.lookAt(target);
 }
-
-
 function avanzarConBotonVR(delta) {
-  if (!personaje || !juegoIniciado || !animManager) return;
+  if (!cameraRig || !juegoIniciado) return;
 
   const velocidad = velocidadMovimiento * delta * 60;
 
@@ -858,14 +860,18 @@ function avanzarConBotonVR(delta) {
   direction.normalize();
   direction.multiplyScalar(velocidad);
 
-  const nuevaPosicion = personaje.position.clone().add(direction);
+  const nuevaPosicion = cameraRig.position.clone().add(direction);
   if (!detectarColision(nuevaPosicion)) {
-    personaje.position.copy(nuevaPosicion);
+    cameraRig.position.copy(nuevaPosicion);
   }
 
-  animManager.reproducirAnimacion('MapacheCaminando');
   detectarColisionConMonedas();
+
+  if (animManager) {
+    animManager.reproducirAnimacion('MapacheCaminando');
+  }
 }
+
 
 function animate() {
   renderer.setAnimationLoop(() => {
