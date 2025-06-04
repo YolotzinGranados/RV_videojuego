@@ -868,6 +868,7 @@ function actualizarCamara() {
   camera.lookAt(target);
 }
 
+
 function avanzarConVR(valor, delta) {
   if (!personaje || !juegoIniciado || !animManager) return;
 
@@ -886,9 +887,25 @@ function avanzarConVR(valor, delta) {
   animManager.reproducirAnimacion('MapacheCaminando');
   detectarColisionConMonedas();
 }
+function avanzarConBotonVR(delta) {
+  const velocidad = velocidadMovimiento * delta * 60;
+
+  const direction = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+  direction.y = 0;
+  direction.normalize();
+  direction.multiplyScalar(velocidad);
+
+  const nuevaPosicion = personaje.position.clone().add(direction);
+  if (!detectarColision(nuevaPosicion)) {
+    personaje.position.copy(nuevaPosicion);
+  }
+
+  animManager.reproducirAnimacion('MapacheCaminando');
+  detectarColisionConMonedas();
+}
 
 
-// Bucle de animación
+
 function animate() {
   renderer.setAnimationLoop(() => {
     const delta = clock.getDelta();
@@ -897,25 +914,23 @@ function animate() {
     actualizarMovimiento(delta);
     actualizarCamara();
 
-    renderer.render(scene, camera);
-  });
-  const session = renderer.xr.getSession();
-if (session) {
-  for (const source of session.inputSources) {
-    if (source.gamepad) {
-      const axes = source.gamepad.axes;
-      const buttons = source.gamepad.buttons;
-
-      // Eje hacia adelante (en la mayoría de los mandos VR es eje[3])
-      const forwardValue = axes[3]; // Cambia a [1] si es el eje vertical
-
-      if (Math.abs(forwardValue) > 0.2) {
-        avanzarConVR(forwardValue, delta);
+    // ✅ DETECTAR BOTÓN A DEL CONTROL DERECHO (VR)
+    const session = renderer.xr.getSession();
+    if (session) {
+      for (const source of session.inputSources) {
+        if (source.gamepad && source.handedness === "right") {
+          const buttons = source.gamepad.buttons;
+          if (buttons[0]?.pressed) {
+            avanzarConBotonVR(delta);
+          }
+        }
       }
     }
-  }
+
+    renderer.render(scene, camera);
+  });
 }
-}
+
 
 
 
